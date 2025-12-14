@@ -1,4 +1,6 @@
+# Ignore Terraform local folders and binaries
 .terraform/
 *.tfstate
 *.tfstate.backup
-*.zip
+.terraform.lock.hcl
+*.log
