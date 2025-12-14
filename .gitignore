@@ -1,6 +1,23 @@
-# Ignore Terraform local directories and state files
+# Terraform directories
 .terraform/
+
+# Terraform state files
 *.tfstate
-*.tfstate.*
+*.tfstate.backup
+
+# Crash logs
+crash.log
+
+# Sensitive override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local variable files
 *.tfvars
-*.backup
+*.tfvars.json
+
+# CLI history
+.terraformrc
+terraform.rc
