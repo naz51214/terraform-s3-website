@@ -1,44 +1,36 @@
-name: Deploy Docker Website
+name: Deploy Docker Website to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repository
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up SSH key for EC2 access
-      - name: Set up SSH
+      - name: Deploy to EC2
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      # 3️⃣ Connect to EC2 and deploy Docker container
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-            # Navigate to website directory or create it
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
             mkdir -p ~/website
             cd ~/website
 
-            # Pull latest code or clone repo if first time
-            git pull || git clone https://github.com/${{ github.repository }} .
+            if [ -d ".git" ]; then
+              git pull
+            else
+              git clone https://github.com/${GITHUB_REPOSITORY} .
+            fi
 
-            # Build Docker image
             docker build -t my-html-site .
-
-            # Stop and remove old container if exists
             docker stop my-html-site || true
             docker rm my-html-site || true
-
-            # Run new container on EC2 port 55000
             docker run -d -p 55000:80 --name my-html-site my-html-site
-          "
+          EOF
